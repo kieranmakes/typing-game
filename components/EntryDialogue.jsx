@@ -3,7 +3,8 @@ import { useRef } from "react";
 const EntryDialogue = ({ updateUser }) => {
   let displayName = useRef("");
   const handleSubmit = () => {
-    console.log();
+    let inputValue = displayName.current.value;
+    if (inputValue.length > 0) updateUser(inputValue);
   };
 
   return (

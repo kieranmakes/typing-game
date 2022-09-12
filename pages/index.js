@@ -1,16 +1,25 @@
 import { createContext, useState, useEffect } from "react";
 import Head from "next/head";
 import Image from "next/image";
+import { useRouter } from "next/router";
+
+import io from "socket.io-client";
+import uniqid from "uniqid";
+
 import styles from "../styles/Home.module.css";
 import TypingThroughInput from "../components/TypingThroughInput";
 import RacerComponent from "../components/RacerComponent";
 import EntryDialogue from "../components/EntryDialogue";
 
+let socket;
 let typingCompletionPercent = createContext();
 
 export default function Home() {
   const [user, setUser] = useState({ displayName: "", userId: "" });
   const [typingCompletion, setTypingCompletion] = useState(0);
+
+  const router = useRouter();
+  const { pid } = router.query;
 
   const updateTypingCompletion = (amountCompleted) => {
     setTypingCompletion(amountCompleted);
@@ -20,10 +29,35 @@ export default function Home() {
     setUser({ ...user, displayName });
   };
 
+  const socketInitializer = async () => {
+    // We just call it because we don't need anything else out of it
+    await fetch("/api/socket");
+
+    socket = io();
+
+    socket.on("newIncomingMessage", (msg) => {
+      setMessages((currentMsg) => [
+        ...currentMsg,
+        { author: msg.author, message: msg.message },
+      ]);
+      console.log(messages);
+    });
+  };
+
+  const sendMessage = async () => {
+    socket.emit("createdMessage", (msg) => {});
+  };
+
   const text = "hello I am bradley and I smell like poop";
   // strip string of spaces and new lines
   //   .replace("\n", " ")
   //   .replace(/\s\s+/g, " ");
+
+  useEffect(() => {
+    setUser({ ...user, userId: uniqid() });
+    socketInitializer();
+    console.log(pid);
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -33,7 +67,7 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div>
-        <EntryDialogue onSubmit={updateUser} />
+        <EntryDialogue updateUser={updateUser} />
         {/* <typingCompletionPercent.Provider */}
         {/*   value={{ typingCompletion, updateTypingCompletion }} */}
         {/* > */}
