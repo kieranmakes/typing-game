@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
-import messageHandler from "../../utils/sockets/messageHandler";
-import Multiplayer from "../../utils/Multiplayer/multiplayer";
+import messageHandler from "../utils/sockets/messageHandler";
+import Multiplayer from "../utils/Multiplayer/multiplayer";
 
 let games = new Map();
 
