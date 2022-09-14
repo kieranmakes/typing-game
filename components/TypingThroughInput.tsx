@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState, useContext } from "react";
 import useTyping from "react-typing-game-hook";
-import { typingCompletionPercent } from "../pages/index.js";
+import { typingCompletionPercent } from "./Game";
 
 const TypeThroughInput = ({ text }) => {
   const [duration, setDuration] = useState(0);
@@ -68,7 +68,7 @@ const TypeThroughInput = ({ text }) => {
         onKeyDown={(e) => handleKeyDown(e.key, e.ctrlKey, e)}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        className={`text-xl outline-none relative font-serif overflow-scroll h-64`}
+        className={`text-xl outline-none relative font-serif overflow-y-auto overflow-x-hidden h-64`}
       >
         <div
           ref={letterElements}

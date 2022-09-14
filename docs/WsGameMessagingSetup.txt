@@ -1,0 +1,46 @@
+===============================================================================================
+Getter Function Return Values
+------------------------------
+
+gameState()                => string -> "init" | "playing" | "finished"
+getPlayers()               => obj -> {playerId: { displayName, completion }}
+getFinishedPlayers()       => obj -> [{ playerId, wpm, accuracy, duration }]
+getPlayersReadyToStart()   => [playerId]
+
+===============================================================================================
+Web socket Flow
+---------------- 
+
+connection -> 
+onConnection    => addPlayer(client_socket.id) => emit getPlayers()
+
+disconnect -> 
+onDisconnect    => removePlayer(client_socket.id) => emit getPlayers()
+                                                  => emit getPlayersReadyToStart()
+                                                  => emit getFinishedPlayers()
+
+start -> 
+onStart         => startGame() => emit gameState()
+
+posUpdate ->
+onPosUpdate     => updatePlayerPosition(client_socket.id, pos) => emit getPlayers()
+
+playerFinish -> 
+onPlayerFinish  => playerFinish(client_socket.id, wpm, accuracy, duration) => emit getFinishedPlayers()
+                => getGameState() === "finished" ?                         => emit getGameState()
+
+reset ->
+onReset()       => getGameState() === "finished" ? resetGame() => emit getGameState()
+
+============================================================================================================
+Message Format:
+----------------
+
+{
+  header: | "gameState"  | "players"     | "finishedPlayers"     | "readyPlayers"
+  msg:    |  gameState() |  getPlayers() |  getFinishedPlayers() |  getPlayersReadyToStart()  
+}
+
+==============================================================================================================
+
+

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext, useRef } from "react";
 import Image from "next/image";
-import { typingCompletionPercent } from "../pages/index.js";
+import { typingCompletionPercent } from "./Game";
 
 const RacerComponent = () => {
   const { typingCompletion } = useContext(typingCompletionPercent);
