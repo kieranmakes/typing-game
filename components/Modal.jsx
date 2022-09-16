@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 
 // modalType: Countdown => countdown -> remove modal,
 //            ReadyBtn  => ReadyBtn -> empty modal & disable background
+//            Wait
 const Modal = ({ modalType, onReady }) => {
   const [countdownValue, setCountdownValue] = useState("3");
   const [modalState, setModalState] = useState(modalType); // Countdown, Hide, ReadyBtn, Cover
@@ -15,7 +16,7 @@ const Modal = ({ modalType, onReady }) => {
   const readyBtn = () => {
     return (
       <button
-        className="bg-black px-5 py-2 text-7xl rounded-t-lg rounded-b-md border-stone-500 border-b-[10px] hover:border-b-[4px] hover:border-stone-600"
+        className="bg-black px-5 py-1 pb-4 text-7xl rounded-t-lg rounded-b-[2px] border-stone-500 border-b-[10px] hover:border-b-[4px] hover:border-stone-600"
         onClick={handleButtonClicked}
       >
         Ready
@@ -25,6 +26,8 @@ const Modal = ({ modalType, onReady }) => {
 
   useEffect(() => {
     if (modalType === "Countdown") {
+      console.log(modalType, "in countdown");
+
       let ci = setInterval(() => {
         if (countdownValue !== 0) {
           setCountdownValue(countdownValue--);
@@ -34,10 +37,13 @@ const Modal = ({ modalType, onReady }) => {
             clearInterval(countdownTimerInterval);
             setCountdownTimerInterval(null);
             setCountdownValue(3);
-          }, 2000);
+          }, 500);
         }
       }, 1000);
       setCountdownTimerInterval(ci);
+    }
+    if (modalType === "Wait") {
+      clearInterval(countdownTimerInterval);
     }
   }, [modalType]);
 
@@ -60,9 +66,15 @@ const Modal = ({ modalType, onReady }) => {
               <p className="p-10 bg-black opacity-40 rounded-lg">
                 Waiting for other players...
               </p>
-              {/* {players.forEach((player) => { */}
-              {/*   return <p>player.displayName</p>; */}
-              {/* })} */}
+            </div>
+          ) : (
+            ""
+          )}
+          {modalType === "Wait" ? (
+            <div>
+              <p className="p-10 bg-black opacity-40 rounded-lg">
+                Please wait for game to finish...
+              </p>
             </div>
           ) : (
             ""

@@ -5,7 +5,7 @@ import Game from "../../components/Game";
 const GamePage = () => {
   const router = useRouter();
   const { gid } = router.query;
-  return <Game gameid={gid} displayName="kieran" />;
+  return <Game gameid={gid} />;
 };
 
 export default GamePage;

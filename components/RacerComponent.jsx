@@ -2,21 +2,39 @@ import React, { useEffect, useState, useContext, useRef } from "react";
 import Image from "next/image";
 import { typingCompletionPercent } from "./Game";
 
-const RacerComponent = () => {
+const RacerComponent = ({ players }) => {
   const { typingCompletion } = useContext(typingCompletionPercent);
-  const playerEl = useRef(null);
-  const [playerElementState, setPlayerElementState] = useState(playerEl);
+  const playerElements = useRef([]);
+  // const [playerElementState, setPlayerElementState] = useState(playerEl);
 
-  const updatePlayerPosition = (typingCompletion) => {
-    playerEl.current.style.left = typingCompletion.toString() + "%";
-    setPlayerElementState(playerEl);
+  // const updatePlayerPosition = (typingCompletion, playerId) => {
+  //   playerEl.current.style.left = typingCompletion.toString() + "%";
+  // };
+
+  // useEffect(() => {
+  //   console.log(typingCompletion);
+  //   updatePlayerPosition(typingCompletion);
+  //   console.log(playerEl.current.style.left);
+  // }, [typingCompletion]);
+
+  const updatePlayerPosition = (playerId, typingCompletion) => {
+    console.log("hellooooooooooooooooooooo");
+    console.log(typingCompletion);
+    console.log(playerElements.current[playerId]);
+    if (playerElements.current[playerId]) {
+      playerElements.current[playerId].style.left =
+        typingCompletion.toString() + "%";
+    }
   };
 
   useEffect(() => {
-    console.log(typingCompletion);
-    updatePlayerPosition(typingCompletion);
-    console.log(playerEl.current.style.left);
-  }, [typingCompletion]);
+    if (players) {
+      Object.keys(players).forEach((playerId) => {
+        updatePlayerPosition(playerId, players[playerId].completion);
+      });
+    }
+  }, [players]);
+
   return (
     <div className="border-2 p-4 rounded-lg my-10 w-2/3 mx-auto">
       <div className="px-10 flex justify-between">
@@ -26,19 +44,33 @@ const RacerComponent = () => {
             width: "120%",
           }}
         >
-          <h1>hello</h1>
-          <h1
-            ref={playerEl}
-            style={{
-              position: "relative",
-              width: "100%",
-            }}
-          >
-            hello
-          </h1>
-          <h1>hello</h1>
-          <h1>hello</h1>
-          <h1>hello</h1>
+          {/* <h1 */}
+          {/*   ref={playerEl} */}
+          {/*   style={{ */}
+          {/*     position: "relative", */}
+          {/*     width: "100%", */}
+          {/*   }} */}
+          {/* > */}
+          {/* hello */}
+          {/* </h1> */}
+          {players
+            ? Object.keys(players).map((playerId) => {
+                return (
+                  <p
+                    style={{
+                      position: "relative",
+                      width: "100%",
+                    }}
+                    ref={(element) => {
+                      playerElements.current[playerId] = element;
+                    }}
+                    key={playerId}
+                  >
+                    {players[playerId].displayName}{" "}
+                  </p>
+                );
+              })
+            : null}
         </div>
         <Image
           src="/finishline.png"

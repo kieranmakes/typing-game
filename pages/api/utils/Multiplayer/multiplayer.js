@@ -16,11 +16,29 @@ class Multiplayer {
     if (i > -1) {
       this.playersReadyToStart.splice(i, 1);
     }
-    this.finishedPlayers = this.finishedPlayers.map((player) => {
-      if (player.playerId !== playerId) {
-        return player;
+
+    let removeByAttr = function (arr, attr, value) {
+      let i = arr.length;
+      while (i--) {
+        if (
+          arr[i] &&
+          arr[i].hasOwnProperty(attr) &&
+          arguments.length > 2 &&
+          arr[i][attr] === value
+        ) {
+          arr.splice(i, 1);
+        }
       }
-    });
+      return arr;
+    };
+
+    if (this.finishedPlayers.length > 0) {
+      this.finishedPlayers = removeByAttr(
+        this.finishedPlayers,
+        "playerId",
+        playerId
+      );
+    }
   }
 
   getPlayers() {

@@ -3,7 +3,7 @@ import Multiplayer from "../Multiplayer/multiplayer";
 const messageHandler = (io, socket, options) => {
   let gameId = options.gameid;
   let game = options.games.get(gameId);
-  let displayName = options.displayName;
+  // let displayName = options.displayName;
 
   const setGame = () => {
     console.log(gameId);
@@ -16,15 +16,18 @@ const messageHandler = (io, socket, options) => {
   };
 
   const onDisconnect = () => {
-    game.removePlayer(socket.id);
-    setGame();
-    io.in(gameId).emit("players", game.getPlayers());
-    io.in(gameId).emit("readyPlayers", game.getPlayersReadyToStart());
-    io.in(gameId).emit("finishedPlayers", game.getFinishedPlayers());
-    if (Object.keys(game.getPlayers()).length === 0) {
-      options.games.delete(gameId);
+    if (game) {
+      console.log(game);
+      game.removePlayer(socket.id);
+      setGame();
+      io.in(gameId).emit("players", game.getPlayers());
+      io.in(gameId).emit("readyPlayers", game.getPlayersReadyToStart());
+      io.in(gameId).emit("finishedPlayers", game.getFinishedPlayers());
+      // Handle clean up of game in the games Map to remove when all players leave
+      if (Object.keys(game.getPlayers()).length === 0) {
+        options.games.delete(gameId);
+      }
     }
-    // TODO: Handle clean up of game in the games Map to remove when all players leave
   };
 
   const onStart = (pos) => {
@@ -40,15 +43,23 @@ const messageHandler = (io, socket, options) => {
     game.updatePlayerPosition(socket.id, pos);
     setGame();
     socket.to(gameId).emit("players", game.getPlayers());
+    console.log(game);
   };
 
-  const onPlayerFinish = (wpm, accuracy, duration) => {
-    game.playerFinish(socket.id, wpm, accuracy, duration);
-    setGame();
-    socket.to(gameId).emit("finishedPlayers", game.getFinishedPlayers());
-    let gameState = game.getGameState();
-    if (gameState === "finished") {
-      socket.to(gameId).emit("gameState", gameState);
+  const onPlayerFinish = ({ wpm, accuracy, duration }) => {
+    if (
+      game
+        .getFinishedPlayers()
+        .map((e) => e.playerId)
+        .indexOf(socket.id) === -1
+    ) {
+      game.playerFinish(socket.id, wpm, accuracy, duration);
+      setGame();
+      socket.to(gameId).emit("finishedPlayers", game.getFinishedPlayers());
+      let gameState = game.getGameState();
+      if (gameState === "finished") {
+        socket.to(gameId).emit("gameState", gameState);
+      }
     }
   };
 
@@ -59,9 +70,10 @@ const messageHandler = (io, socket, options) => {
     }
   };
 
-  socket.on("gameid", (gameid) => {
+  socket.on("gameid", ({ gameid, displayName }) => {
     console.log("here");
     gameId = gameid;
+    displayName = displayName;
     game = options.games.get(gameId);
     if (!game) {
       game = new Multiplayer();
@@ -70,8 +82,10 @@ const messageHandler = (io, socket, options) => {
     socket.leaveAll();
 
     socket.join(gameId);
-    game.addPlayer(socket.id, displayName);
-    setGame();
+    if (game.getGameState() === "init") {
+      game.addPlayer(socket.id, displayName);
+      setGame();
+    }
     io.in(gameId).emit("players", game.getPlayers());
     io.in(gameId).emit("readyPlayers", game.getPlayersReadyToStart());
     io.in(gameId).emit("gameState", game.getGameState());

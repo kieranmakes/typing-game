@@ -4,10 +4,14 @@ import { typingCompletionPercent } from "./Game";
 
 const TypeThroughInput = ({ text }) => {
   const [duration, setDuration] = useState(0);
+  const [wpm, setWpm] = useState(0);
+  const [accuracy, setAccuracy] = useState(0);
   const [isFocused, setIsFocused] = useState(false);
   const letterElements = useRef(null);
 
-  const { updateTypingCompletion } = useContext(typingCompletionPercent);
+  const { updateTypingCompletion, updateFinishedStats } = useContext(
+    typingCompletionPercent
+  );
 
   const totalChars = text.length;
 
@@ -47,6 +51,24 @@ const TypeThroughInput = ({ text }) => {
       setDuration(0);
     }
   }, [phase, startTime, endTime]);
+
+  useEffect(() => {
+    if (duration !== 0) {
+      setWpm(Math.round(((60 / duration) * correctChar) / 5));
+      let acc = (
+        ((correctChar - errorChar < 0 ? 0 : correctChar - errorChar) /
+          text.length) *
+        100
+      ).toFixed(2);
+      setAccuracy(Number.parseFloat(acc));
+    }
+  }, [duration]);
+
+  useEffect(() => {
+    if (duration !== 0 && wpm != 0) {
+      updateFinishedStats({ wpm, accuracy, duration });
+    }
+  }, [wpm, accuracy, duration]);
 
   //handle key presses
   const handleKeyDown = (letter: string, control: boolean, e) => {
