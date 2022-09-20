@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 // modalType: Countdown => countdown -> remove modal,
 //            ReadyBtn  => ReadyBtn -> empty modal & disable background
 //            Wait
-const Modal = ({ modalType, onReady }) => {
+//            Finished
+const Modal = ({ modalType, onReady, finishedStats, players, onReset }) => {
   const [countdownValue, setCountdownValue] = useState("3");
   const [modalState, setModalState] = useState(modalType); // Countdown, Hide, ReadyBtn, Cover
   const [countdownTimerInterval, setCountdownTimerInterval] = useState();
@@ -36,7 +37,6 @@ const Modal = ({ modalType, onReady }) => {
             setModalState("Hide");
             clearInterval(countdownTimerInterval);
             setCountdownTimerInterval(null);
-            setCountdownValue(3);
           }, 500);
         }
       }, 1000);
@@ -55,9 +55,60 @@ const Modal = ({ modalType, onReady }) => {
     );
   };
 
+  const scoreboard = () => {
+    return (
+      <div className="flex flex-col items-center -mt-[20%]">
+        <table className="table-auto  border-collapse border-spacing-2 text-sm text-center">
+          <thead className="text-xl">
+            <tr>
+              <th className="px-[30px] py-[10px] border-b border-b-gray-700">
+                Player
+              </th>
+              <th className="px-[30px]  py-[10px] border-b border-b-gray-700">
+                #
+              </th>
+              <th className="px-[30px]  py-[10px] border-b border-b-gray-700">
+                WPM
+              </th>
+              <th className="px-[30px]  py-[10px] border-b border-b-gray-700">
+                Accuracy
+              </th>
+              <th className="px-[30px]  py-[10px] border-b border-b-gray-700">
+                Duration
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {finishedStats.map((row, i) => {
+              if (players[row.playerId]) {
+                return (
+                  <tr key={row.playerId}>
+                    <td className="px-[30px] py-[5px] ">
+                      {players[row.playerId].displayName}
+                    </td>
+                    <td className="px-[30px] py-[5px] ">{i + 1}</td>
+                    <td className="px-[30px] py-[5px] ">{row.wpm}</td>
+                    <td className="px-[30px] py-[5px] ">{row.accuracy}%</td>
+                    <td className="px-[30px] py-[5px] ">{row.duration}s</td>
+                  </tr>
+                );
+              }
+            })}
+          </tbody>
+        </table>
+        <button
+          onClick={onReset}
+          className="bg-neutral-500 px-5 py-3 border rounded-lg border-[cyan] hover:bg-neutral-600 mt-20"
+        >
+          RESET GAME!
+        </button>
+      </div>
+    );
+  };
+
   if (modalState !== "Hide") {
     return (
-      <div className="absolute h-screen w-screen opacity-80 bg-[gray] z-[10] mix-blend-invert">
+      <div className="absolute h-screen w-screen opacity-[98%] bg-[gray] z-[10] ">
         <div className="flex h-screen w-screen justify-center items-center">
           {modalType === "Countdown" ? countdown() : ""}
           {modalType === "ReadyBtn" && modalState !== "Cover" ? readyBtn() : ""}
@@ -79,6 +130,7 @@ const Modal = ({ modalType, onReady }) => {
           ) : (
             ""
           )}
+          {modalType === "Finished" ? scoreboard() : ""}
         </div>
       </div>
     );

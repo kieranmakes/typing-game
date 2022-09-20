@@ -21,6 +21,7 @@ const Game = ({ gameid }) => {
 
   const [hideModal, setHideModal] = useState(false);
   const [waitForNextGame, setWaitForNextGame] = useState(false);
+  const [resetBtnPressed, setResetBtnPressed] = useState(false);
 
   const [displayName, setDisplayName] = useState("");
   const [getDisplayName, setGetDisplayName] = useState(false);
@@ -28,9 +29,6 @@ const Game = ({ gameid }) => {
   const updateTypingCompletion = (amountCompleted) => {
     setTypingCompletion(amountCompleted);
     socket.emit("posUpdate", amountCompleted);
-    // if (typingCompletion === 100) {
-    //   // TODO add wpm, accuracy, duration to setPlayersFinished object
-    // }
   };
 
   const updateFinishedStats = ({ wpm, accuracy, duration }) => {
@@ -49,7 +47,7 @@ const Game = ({ gameid }) => {
     socket.emit("start", {});
   };
 
-  const text = "kieran smells like a willy";
+  const text = "kieran";
   // strip string of spaces and new lines
   //   .replace("\n", " ")
   //   .replace(/\s\s+/g, " ");
@@ -76,6 +74,9 @@ const Game = ({ gameid }) => {
       socket.on("readyPlayers", (msg) => {
         console.log("readyPlayers:", msg);
         setPlayerReadyToStart(msg);
+      });
+      socket.on("reset", (msg) => {
+        location.reload();
       });
       console.log(socket);
     }
@@ -118,16 +119,6 @@ const Game = ({ gameid }) => {
     }
   }, [socket, finishedStats, playersFinished]);
 
-  // useEffect(() => {
-  //   console.log(playersFinished);
-  //   if (socket) {
-  //     let i = playersFinished.map((e) => e.playerId).indexOf(socket.id);
-  //     if (i !== -1) {
-  //       socket.emit("playerFinish", playersFinished[i]);
-  //     }
-  //   }
-  // }, [socket, playersFinished]);
-
   useEffect(() => {
     let displayName = window.localStorage.getItem("displayName");
     if (displayName) {
@@ -147,7 +138,24 @@ const Game = ({ gameid }) => {
       ) : (
         ""
       )}
-
+      {gameState === "finished" ? (
+        <Modal
+          modalType="Finished"
+          finishedStats={playersFinished}
+          players={players}
+          onReset={() => {
+            // setPlayersFinished([]);
+            // setFinishedStats({});
+            // setPlayerReadyToStart([]);
+            // setPlayers({});
+            // setWaitForNextGame(false);
+            socket.emit("reset");
+            location.reload();
+          }}
+        />
+      ) : (
+        ""
+      )}
       {waitForNextGame ? (
         <Modal modalType="Wait" />
       ) : (

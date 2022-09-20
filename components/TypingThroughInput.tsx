@@ -3,9 +3,9 @@ import useTyping from "react-typing-game-hook";
 import { typingCompletionPercent } from "./Game";
 
 const TypeThroughInput = ({ text }) => {
-  const [duration, setDuration] = useState(0);
-  const [wpm, setWpm] = useState(0);
-  const [accuracy, setAccuracy] = useState(0);
+  const [duration, setDuration] = useState(null);
+  const [wpm, setWpm] = useState(null);
+  const [accuracy, setAccuracy] = useState(null);
   const [isFocused, setIsFocused] = useState(false);
   const letterElements = useRef(null);
 
@@ -47,13 +47,16 @@ const TypeThroughInput = ({ text }) => {
   useEffect(() => {
     if (phase === 2 && endTime && startTime) {
       setDuration(Math.floor((endTime - startTime) / 1000));
+      setTimeout(() => {
+        resetTyping();
+      }, 3000);
     } else {
-      setDuration(0);
+      setDuration(null);
     }
   }, [phase, startTime, endTime]);
 
   useEffect(() => {
-    if (duration !== 0) {
+    if (duration !== null) {
       setWpm(Math.round(((60 / duration) * correctChar) / 5));
       let acc = (
         ((correctChar - errorChar < 0 ? 0 : correctChar - errorChar) /
@@ -65,7 +68,7 @@ const TypeThroughInput = ({ text }) => {
   }, [duration]);
 
   useEffect(() => {
-    if (duration !== 0 && wpm != 0) {
+    if (duration !== null && wpm !== null) {
       updateFinishedStats({ wpm, accuracy, duration });
     }
   }, [wpm, accuracy, duration]);

@@ -47,6 +47,7 @@ const messageHandler = (io, socket, options) => {
   };
 
   const onPlayerFinish = ({ wpm, accuracy, duration }) => {
+    console.log("in on finish");
     if (
       game
         .getFinishedPlayers()
@@ -67,6 +68,11 @@ const messageHandler = (io, socket, options) => {
     if (game.getGameState() === "finished") {
       game.resetGame();
       setGame();
+      io.in(gameId).emit("players", game.getPlayers());
+      io.in(gameId).emit("readyPlayers", game.getPlayersReadyToStart());
+      io.in(gameId).emit("gameState", game.getGameState());
+      io.in(gameId).emit("finishedPlayers", game.getFinishedPlayers());
+      io.in(gameId).emit("reset");
     }
   };
 
