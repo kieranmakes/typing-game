@@ -26,6 +26,9 @@ const Game = ({ gameid }) => {
   const [displayName, setDisplayName] = useState("");
   const [getDisplayName, setGetDisplayName] = useState(false);
 
+  const [textForGame, setTextForGame] = useState("");
+  const [socketInitialized, setSocketInitialized] = useState(false);
+
   const updateTypingCompletion = (amountCompleted) => {
     setTypingCompletion(amountCompleted);
     socket.emit("posUpdate", amountCompleted);
@@ -44,6 +47,7 @@ const Game = ({ gameid }) => {
   };
 
   const handlePlayerReady = async () => {
+    console.log("handlePlayerStart");
     socket.emit("start", {});
   };
 
@@ -57,7 +61,8 @@ const Game = ({ gameid }) => {
   }, [gameid]);
 
   useEffect(() => {
-    if (socket !== null) {
+    if (!socketInitialized && socket) {
+      setSocketInitialized(true);
       socket.emit("gameid", { gameid, displayName });
       socket.on("gameState", (msg) => {
         console.log("gameState:", msg);
@@ -75,12 +80,22 @@ const Game = ({ gameid }) => {
         console.log("readyPlayers:", msg);
         setPlayerReadyToStart(msg);
       });
+      socket.on("textForGame", (msg) => {
+        console.log("textForGame:", msg);
+        setTextForGame(msg);
+      });
       socket.on("reset", (msg) => {
         location.reload();
       });
+      let ls_textForGame = window.localStorage.getItem("textForGame&" + gameid);
+      console.log(gameid);
+      console.log(ls_textForGame);
+      if (ls_textForGame) {
+        socket.emit("textForGame", ls_textForGame);
+      }
       console.log(socket);
     }
-  }, [socket]);
+  }, [socket, socketInitialized]);
 
   useEffect(() => {
     if (socket && players) {
@@ -177,7 +192,7 @@ const Game = ({ gameid }) => {
         </div>
         <div className="border-2 p-4 rounded-lg w-1/2 h-1/2 mt-8 mx-auto">
           <h1 className="mb-2">Type Racer</h1>
-          <TypingThroughInput text={text} />
+          <TypingThroughInput text={textForGame} />
         </div>
       </typingCompletionPercent.Provider>
       <div>{JSON.stringify(finishedStats)}</div>

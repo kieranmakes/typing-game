@@ -9,6 +9,10 @@ const Modal = ({ modalType, onReady, finishedStats, players, onReset }) => {
   const [modalState, setModalState] = useState(modalType); // Countdown, Hide, ReadyBtn, Cover
   const [countdownTimerInterval, setCountdownTimerInterval] = useState();
 
+  const [finishedStatsCopy, setFinishedStatsCopy] = useState();
+  const [playersCopy, setPlayersCopy] = useState();
+  const [copyOccurred, setCopyOccurred] = useState(false);
+
   const handleButtonClicked = () => {
     setModalState("Cover");
     onReady();
@@ -47,6 +51,14 @@ const Modal = ({ modalType, onReady, finishedStats, players, onReset }) => {
     }
   }, [modalType]);
 
+  useEffect(() => {
+    if (!copyOccurred) {
+      setFinishedStatsCopy(finishedStats);
+      setPlayersCopy(players);
+      setCopyOccurred(true);
+    }
+  }, [players, finishedStats, copyOccurred]);
+
   const countdown = () => {
     return (
       <h1 className="bg-black px-5 py-2 text-7xl rounded-lg">
@@ -79,21 +91,23 @@ const Modal = ({ modalType, onReady, finishedStats, players, onReset }) => {
             </tr>
           </thead>
           <tbody>
-            {finishedStats.map((row, i) => {
-              if (players[row.playerId]) {
-                return (
-                  <tr key={row.playerId}>
-                    <td className="px-[30px] py-[5px] ">
-                      {players[row.playerId].displayName}
-                    </td>
-                    <td className="px-[30px] py-[5px] ">{i + 1}</td>
-                    <td className="px-[30px] py-[5px] ">{row.wpm}</td>
-                    <td className="px-[30px] py-[5px] ">{row.accuracy}%</td>
-                    <td className="px-[30px] py-[5px] ">{row.duration}s</td>
-                  </tr>
-                );
-              }
-            })}
+            {finishedStatsCopy
+              ? finishedStatsCopy.map((row, i) => {
+                  if (playersCopy[row.playerId]) {
+                    return (
+                      <tr key={row.playerId}>
+                        <td className="px-[30px] py-[5px] ">
+                          {playersCopy[row.playerId].displayName}
+                        </td>
+                        <td className="px-[30px] py-[5px] ">{i + 1}</td>
+                        <td className="px-[30px] py-[5px] ">{row.wpm}</td>
+                        <td className="px-[30px] py-[5px] ">{row.accuracy}%</td>
+                        <td className="px-[30px] py-[5px] ">{row.duration}s</td>
+                      </tr>
+                    );
+                  }
+                })
+              : ""}
           </tbody>
         </table>
         <button

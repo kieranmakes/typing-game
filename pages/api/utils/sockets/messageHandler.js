@@ -31,6 +31,10 @@ const messageHandler = (io, socket, options) => {
   };
 
   const onStart = (pos) => {
+    console.log("onStart");
+    console.log(gameId);
+    console.log(game);
+
     game.startGame(socket.id);
     setGame();
     io.in(gameId).emit("readyPlayers", game.getPlayersReadyToStart());
@@ -46,8 +50,13 @@ const messageHandler = (io, socket, options) => {
     console.log(game);
   };
 
+  const onTextForGame = (text) => {
+    game.setGameText(text);
+    setGame();
+    io.in(gameId).emit("textForGame", game.getGameText());
+  };
+
   const onPlayerFinish = ({ wpm, accuracy, duration }) => {
-    console.log("in on finish");
     if (
       game
         .getFinishedPlayers()
@@ -81,6 +90,7 @@ const messageHandler = (io, socket, options) => {
     gameId = gameid;
     displayName = displayName;
     game = options.games.get(gameId);
+
     if (!game) {
       game = new Multiplayer();
       setGame();
@@ -95,6 +105,7 @@ const messageHandler = (io, socket, options) => {
     io.in(gameId).emit("players", game.getPlayers());
     io.in(gameId).emit("readyPlayers", game.getPlayersReadyToStart());
     io.in(gameId).emit("gameState", game.getGameState());
+    io.in(gameId).emit("textForGame", game.getGameText());
   });
 
   socket.on("disconnect", onDisconnect);
@@ -102,6 +113,7 @@ const messageHandler = (io, socket, options) => {
   socket.on("start", onStart);
   socket.on("posUpdate", onPosUpdate);
   socket.on("playerFinish", onPlayerFinish);
+  socket.on("textForGame", onTextForGame);
   socket.on("reset", onReset);
 };
 

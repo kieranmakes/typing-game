@@ -4,6 +4,16 @@ class Multiplayer {
     this.playersReadyToStart = [];
     this.finishedPlayers = [];
     this.gameState = "init"; // init, playing, finished
+    this.textForGame = "hello there this is default text";
+  }
+
+  getGameText() {
+    return this.textForGame;
+  }
+
+  setGameText(text) {
+    text = text.replace("\n", " ").replace(/\s\s+/g, " ");
+    this.textForGame = text;
   }
 
   addPlayer(playerId, displayName) {
